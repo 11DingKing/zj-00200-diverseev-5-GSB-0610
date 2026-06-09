@@ -12,6 +12,7 @@ const db = require("./database");
 const vehiclesRouter = require("./routes/vehicles");
 const suggestionsRouter = require("./routes/suggestions");
 const decisionSupportRouter = require("./routes/decisionSupport");
+const comparisonRouter = require("./routes/comparison");
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -22,6 +23,7 @@ app.use(express.json());
 app.use("/api/vehicles", vehiclesRouter);
 app.use("/api/suggestions", suggestionsRouter);
 app.use("/api/decision", decisionSupportRouter);
+app.use("/api/comparison", comparisonRouter);
 
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", message: "DiverseEV Monitor API 运行正常" });

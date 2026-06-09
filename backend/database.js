@@ -100,6 +100,14 @@ function initDatabase() {
       UNIQUE(region_id, category)
     )`);
 
+    db.run(`CREATE TABLE IF NOT EXISTS comparison_set (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      vehicle_id INTEGER NOT NULL,
+      added_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (vehicle_id) REFERENCES vehicles(id) ON DELETE CASCADE,
+      UNIQUE(vehicle_id)
+    )`);
+
     console.log("数据表初始化完成");
   });
 }
