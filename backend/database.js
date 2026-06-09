@@ -83,6 +83,13 @@ function initDatabase() {
       UNIQUE(code)
     )`);
 
+    db.run(`CREATE TABLE IF NOT EXISTS comparison_set (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      vehicle_id INTEGER NOT NULL UNIQUE,
+      added_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (vehicle_id) REFERENCES vehicles(id) ON DELETE CASCADE
+    )`);
+
     db.run(`CREATE TABLE IF NOT EXISTS region_vehicle_requirements (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       region_id INTEGER NOT NULL,

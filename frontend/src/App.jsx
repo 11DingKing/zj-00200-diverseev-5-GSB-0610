@@ -9,6 +9,7 @@ import {
   BulbOutlined,
   EnvironmentOutlined,
   RocketOutlined,
+  SwapOutlined,
 } from "@ant-design/icons";
 import Dashboard from "./pages/Dashboard.jsx";
 import VehicleList from "./pages/VehicleList.jsx";
@@ -17,6 +18,7 @@ import ScenarioMatch from "./pages/ScenarioMatch.jsx";
 import Suggestions from "./pages/Suggestions.jsx";
 import RegionalAnalysis from "./pages/RegionalAnalysis.jsx";
 import DecisionSupport from "./pages/DecisionSupport.jsx";
+import Comparison from "./pages/Comparison.jsx";
 
 const { Header, Content, Footer } = Layout;
 
@@ -33,6 +35,11 @@ function App() {
       key: "/vehicles",
       icon: <CarOutlined />,
       label: <Link to="/vehicles">车型管理</Link>,
+    },
+    {
+      key: "/comparison",
+      icon: <SwapOutlined />,
+      label: <Link to="/comparison">车型对比</Link>,
     },
     {
       key: "/statistics",
@@ -80,6 +87,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/vehicles" element={<VehicleList />} />
+          <Route path="/comparison" element={<Comparison />} />
           <Route path="/statistics" element={<Statistics />} />
           <Route path="/regional" element={<RegionalAnalysis />} />
           <Route path="/scenario" element={<ScenarioMatch />} />
