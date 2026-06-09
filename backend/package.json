@@ -1,0 +1,19 @@
+{
+  "name": "diverseev-backend",
+  "version": "1.0.0",
+  "description": "新能源汽车产品多元化供给监测平台 - 后端服务",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js",
+    "init:data": "node scripts/initData.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "sqlite3": "^5.1.6"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
