@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { 
   Table, Button, Tag, Select, Input, Modal, Form, InputNumber, 
-  message, Popconfirm, Space, Row, Col, Card
+  message, Popconfirm, Space, Row, Col, Card, Badge, Tooltip
 } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons';
-import { vehicleAPI, metaAPI } from '../api.js';
+import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, SwapOutlined } from '@ant-design/icons';
+import { Link } from 'react-router-dom';
+import { vehicleAPI, metaAPI, comparisonAPI } from '../api.js';
 
 const { Option } = Select;
 const { Search } = Input;
@@ -22,10 +23,26 @@ function VehicleList() {
   const [modalVisible, setModalVisible] = useState(false);
   const [editingVehicle, setEditingVehicle] = useState(null);
   const [form] = Form.useForm();
+  const [compareIds, setCompareIds] = useState(new Set());
+  const [compareCount, setCompareCount] = useState(0);
+  const [compareMax, setCompareMax] = useState(4);
+
+  const loadComparison = useCallback(async () => {
+    try {
+      const res = await comparisonAPI.getComparison();
+      const ids = new Set(res.data.vehicles.map(v => v.id));
+      setCompareIds(ids);
+      setCompareCount(res.data.count);
+      setCompareMax(res.data.maxCount);
+    } catch (error) {
+      console.error('加载对比集失败:', error);
+    }
+  }, []);
 
   useEffect(() => {
     loadMeta();
     loadVehicles();
+    loadComparison();
   }, [filters]);
 
   const loadMeta = async () => {
@@ -83,6 +100,7 @@ function VehicleList() {
       await vehicleAPI.deleteVehicle(id);
       message.success('删除成功');
       loadVehicles();
+      loadComparison();
     } catch (error) {
       message.error('删除失败');
       console.error(error);
@@ -103,6 +121,27 @@ function VehicleList() {
     } catch (error) {
       message.error(editingVehicle ? '更新失败' : '创建失败');
       console.error(error);
+    }
+  };
+
+  const handleAddToCompare = async (vehicle) => {
+    try {
+      await comparisonAPI.addToComparison(vehicle.id);
+      message.success(`已将 ${vehicle.brand} ${vehicle.name} 加入对比`);
+      loadComparison();
+    } catch (error) {
+      const msg = error.response?.data?.error || '加入对比失败';
+      message.error(msg);
+    }
+  };
+
+  const handleRemoveFromCompare = async (id) => {
+    try {
+      await comparisonAPI.removeFromComparison(id);
+      message.success('已从对比集移除');
+      loadComparison();
+    } catch (error) {
+      message.error('移除失败');
     }
   };
 
@@ -230,24 +269,46 @@ function VehicleList() {
     {
       title: '操作',
       key: 'action',
-      width: 150,
-      render: (_, record) => (
-        <Space size="small">
-          <Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleEdit(record)}>
-            编辑
-          </Button>
-          <Popconfirm
-            title="确定删除该车型？"
-            onConfirm={() => handleDelete(record.id)}
-            okText="确定"
-            cancelText="取消"
-          >
-            <Button type="link" size="small" danger icon={<DeleteOutlined />}>
-              删除
+      width: 200,
+      render: (_, record) => {
+        const inCompare = compareIds.has(record.id);
+        return (
+          <Space size="small" wrap>
+            <Button type="link" size="small" icon={<EditOutlined />} onClick={() => handleEdit(record)}>
+              编辑
             </Button>
-          </Popconfirm>
-        </Space>
-      )
+            {inCompare ? (
+              <Tooltip title="从对比集移除">
+                <Button type="link" size="small" style={{ color: '#faad14' }} onClick={() => handleRemoveFromCompare(record.id)}>
+                  已加入对比
+                </Button>
+              </Tooltip>
+            ) : (
+              <Tooltip title={compareCount >= compareMax ? `对比集最多${compareMax}款` : '加入对比集'}>
+                <Button 
+                  type="link" 
+                  size="small" 
+                  icon={<SwapOutlined />}
+                  disabled={compareCount >= compareMax}
+                  onClick={() => handleAddToCompare(record)}
+                >
+                  加入对比
+                </Button>
+              </Tooltip>
+            )}
+            <Popconfirm
+              title="确定删除该车型？"
+              onConfirm={() => handleDelete(record.id)}
+              okText="确定"
+              cancelText="取消"
+            >
+              <Button type="link" size="small" danger icon={<DeleteOutlined />}>
+                删除
+              </Button>
+            </Popconfirm>
+          </Space>
+        );
+      }
     }
   ];
 
@@ -259,6 +320,15 @@ function VehicleList() {
             <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
               新增车型
             </Button>
+          </Col>
+          <Col>
+            <Link to="/compare">
+              <Badge count={compareCount} overflowCount={compareMax} offset={[0, 0]}>
+                <Button icon={<SwapOutlined />}>
+                  车型对比
+                </Button>
+              </Badge>
+            </Link>
           </Col>
           <Col>
             <Select
@@ -322,7 +392,7 @@ function VehicleList() {
             showTotal: (total) => `共 ${total} 条数据`,
             pageSize: 15
           }}
-          scroll={{ x: 1200 }}
+          scroll={{ x: 1300 }}
         />
       </Card>
 
