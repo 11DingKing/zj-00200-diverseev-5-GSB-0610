@@ -46,4 +46,12 @@ export const decisionAPI = {
     api.post("/decision/report/generate", reportConfig),
 };
 
+export const comparisonAPI = {
+  getList: () => api.get("/comparison"),
+  getCount: () => api.get("/comparison/count"),
+  addVehicle: (vehicleId) => api.post(`/comparison/${vehicleId}`),
+  removeVehicle: (vehicleId) => api.delete(`/comparison/${vehicleId}`),
+  clearAll: () => api.delete("/comparison"),
+};
+
 export default api;
